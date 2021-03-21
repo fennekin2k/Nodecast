@@ -1,0 +1,45 @@
+<html><head><title>Purecast test page</title>
+<style>
+.record, .stop {
+	width: 400px;
+	height: 48px;
+	font-size: 2em;
+	margin-top: 160px;
+}
+</style>
+</head><body>
+
+<audio id='webmAuPlay' 
+	type='audio/webm' controls>
+</audio>
+
+</body><script>
+'use strict'
+
+let recvChunks =[];
+
+function listen(){
+let oReq =new XMLHttpRequest();
+oReq.open('POST', 'http://178.154.211.249:8080/listen', true);
+oReq.responseType ='blob';
+oReq.onloadend =function(oEvent){
+	
+	let audioBlob =oReq.response;
+	recvChunks.push(audioBlob);
+	
+	let fullblob =new Blob(recvChunks, { 'type' : 'audio/ogg; codecs=opus' });
+	let audioURL =window.URL.createObjectURL(fullblob);
+	document.getElementById('webmAuPlay').src =audioURL;
+	document.getElementById('webmAuPlay').play();
+	
+	document.getElementById('webmAuPlay').onstop =function(){ listen() };
+};
+oReq.send(chunk);
+oReq.onerror =function(){
+	console.log(this);
+};
+}
+
+listen();
+</script>
+</html>
